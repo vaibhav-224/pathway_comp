@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceAI Dashboard | Real-time Portfolio & Analytics</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .welcome-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome-section p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card .icon {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        .status-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .status-item {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+
+        .status-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .status-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #10b981;
+            margin-bottom: 1rem;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .welcome-section h1 {
+                font-size: 2rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i> FinanceAI
+            </div>
+            <nav class="nav-links">
+                <a href="/" class="active"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="/portfolio"><i class="fas fa-wallet"></i> Portfolio</a>
+                <a href="/fundamental_analysis"><i class="fas fa-chart-bar"></i> Analysis</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <div class="live-indicator">
+                <div class="live-dot"></div>
+                System Running - Real Implementations Active
+            </div>
+            
+            <h1>Welcome to FinanceAI</h1>
+            <p>Real-time Portfolio Management & AI-Powered Financial Analysis</p>
+            
+            <div class="cta-buttons">
+                <a href="/portfolio" class="cta-btn">
+                    <i class="fas fa-wallet"></i> View Portfolio
+                </a>
+                <a href="/fundamental_analysis" class="cta-btn">
+                    <i class="fas fa-chart-bar"></i> Stock Analysis
+                </a>
+            </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Real-time Portfolio</h3>
+                <p>Live portfolio tracking with real market data, automatic updates, and comprehensive performance metrics.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3>AI-Powered Insights</h3>
+                <p>Advanced AI analysis using Gemini API for market sentiment, stock evaluation, and trading recommendations.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon">
+                    <i class="fas fa-stream"></i>
+                </div>
+                <h3>Pathway Streaming</h3>
+                <p>Real-time data processing with Pathway for live news analysis, market feeds, and portfolio calculations.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon">
+                    <i class="fas fa-newspaper"></i>
+                </div>
+                <h3>News Analysis</h3>
+                <p>Live news crawling from multiple sources with sentiment analysis and market impact assessment.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <h3>Smart Alerts</h3>
+                <p>Intelligent alerting system for price movements, news events, and portfolio performance changes.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="icon">
+                    <i class="fas fa-analytics"></i>
+                </div>
+                <h3>Technical Analysis</h3>
+                <p>Comprehensive technical indicators, risk metrics, and fundamental analysis for informed decisions.</p>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="status-section">
+            <h2 style="text-align: center; margin-bottom: 2rem; color: #333;">System Status</h2>
+            
+            <div class="status-grid" id="systemStatus">
+                <div class="status-item">
+                    <div class="status-value" id="portfolioStocks">Loading...</div>
+                    <div class="status-label">Portfolio Stocks</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-value" id="newsArticles">Loading...</div>
+                    <div class="status-label">News Articles</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-value" id="marketFeeds">Loading...</div>
+                    <div class="status-label">Market Feeds</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-value" id="aiInsights">Loading...</div>
+                    <div class="status-label">AI Insights</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load system status
+        async function loadSystemStatus() {
+            try {
+                // Portfolio status
+                const portfolioResponse = await fetch('/api/portfolio/data');
+                if (portfolioResponse.ok) {
+                    const portfolioData = await portfolioResponse.json();
+                    document.getElementById('portfolioStocks').textContent = 
+                        portfolioData.summary?.total_stocks || '0';
+                }
+
+                // News status
+                const newsResponse = await fetch('/api/crawled_news');
+                if (newsResponse.ok) {
+                    const newsData = await newsResponse.json();
+                    document.getElementById('newsArticles').textContent = 
+                        newsData.total_articles || '0';
+                }
+
+                // Market feeds
+                document.getElementById('marketFeeds').textContent = 'Active';
+                
+                // AI insights
+                document.getElementById('aiInsights').textContent = 'Ready';
+
+            } catch (error) {
+                console.error('Error loading system status:', error);
+                document.getElementById('portfolioStocks').textContent = 'Error';
+                document.getElementById('newsArticles').textContent = 'Error';
+                document.getElementById('marketFeeds').textContent = 'Error';
+                document.getElementById('aiInsights').textContent = 'Error';
+            }
+        }
+
+        // Load status on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSystemStatus();
+            
+            // Refresh status every 30 seconds
+            setInterval(loadSystemStatus, 30000);
+        });
+    </script>
+</body>
+</html>

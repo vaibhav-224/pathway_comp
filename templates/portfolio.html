@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Manager | FinanceAI</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .portfolio-header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .portfolio-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .portfolio-actions {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #dee2e6;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .holdings-section, .ai-insights-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .holdings-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+
+        .holdings-table th,
+        .holdings-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .holdings-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .holdings-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .gain-positive {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .gain-negative {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .stock-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.8rem;
+            border-radius: 4px;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .ai-insight-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .insight-grade {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .grade-a { background: #d4edda; color: #155724; }
+        .grade-b { background: #d1ecf1; color: #0c5460; }
+        .grade-c { background: #fff3cd; color: #856404; }
+        .grade-d { background: #f8d7da; color: #721c24; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .portfolio-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .portfolio-actions {
+                flex-direction: column;
+            }
+            
+            .holdings-table {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i> FinanceAI
+            </div>
+            <nav class="nav-links">
+                <a href="/"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="/portfolio" class="active"><i class="fas fa-wallet"></i> Portfolio</a>
+                <a href="/fundamental_analysis"><i class="fas fa-chart-bar"></i> Analysis</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="portfolio-header">
+            <div class="section-title">
+                <i class="fas fa-wallet"></i>
+                My Portfolio
+            </div>
+            
+            <div class="portfolio-summary" id="portfolioSummary">
+                <div class="summary-card">
+                    <div class="summary-value" id="totalValue">Loading...</div>
+                    <div class="summary-label">Total Value</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value" id="totalGainLoss">Loading...</div>
+                    <div class="summary-label">Total Gain/Loss</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value" id="totalPercentage">Loading...</div>
+                    <div class="summary-label">Performance</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value" id="totalStocks">Loading...</div>
+                    <div class="summary-label">Holdings</div>
+                </div>
+            </div>
+
+            <div class="portfolio-actions">
+                <button class="btn btn-primary" onclick="openAddStockModal()">
+                    <i class="fas fa-plus"></i> Add Stock
+                </button>
+                <button class="btn btn-secondary" onclick="refreshPortfolio()">
+                    <i class="fas fa-refresh"></i> Refresh
+                </button>
+                <button class="btn btn-secondary" onclick="getAIAnalysis()">
+                    <i class="fas fa-brain"></i> AI Analysis
+                </button>
+            </div>
+        </div>
+
+        <div class="portfolio-grid">
+            <div class="holdings-section">
+                <div class="section-title">
+                    <i class="fas fa-list"></i>
+                    Current Holdings
+                </div>
+                
+                <div id="holdingsContent">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Loading portfolio data...
+                    </div>
+                </div>
+            </div>
+
+            <div class="ai-insights-section">
+                <div class="section-title">
+                    <i class="fas fa-brain"></i>
+                    AI Insights
+                </div>
+                
+                <div id="aiInsightsContent">
+                    <div class="ai-insight-card">
+                        <p>Click "AI Analysis" to get intelligent insights about your portfolio performance, risk assessment, and recommendations.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Stock Modal -->
+    <div id="addStockModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddStockModal()">&times;</span>
+            <h2>Add Stock to Portfolio</h2>
+            <form id="addStockForm">
+                <div class="form-group">
+                    <label for="stockSymbol">Stock Symbol</label>
+                    <input type="text" id="stockSymbol" placeholder="e.g., AAPL" required>
+                </div>
+                <div class="form-group">
+                    <label for="stockShares">Number of Shares</label>
+                    <input type="number" id="stockShares" placeholder="e.g., 100" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="purchasePrice">Purchase Price per Share</label>
+                    <input type="number" id="purchasePrice" placeholder="e.g., 150.00" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="purchaseDate">Purchase Date (Optional)</label>
+                    <input type="date" id="purchaseDate">
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Stock
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Stock Analysis Modal -->
+    <div id="stockAnalysisModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <span class="close" onclick="closeStockAnalysisModal()">&times;</span>
+            <h2 id="analysisModalTitle">Stock Analysis</h2>
+            <div id="stockAnalysisContent">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Generating AI analysis...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let portfolioData = {};
+        
+        // Load portfolio data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPortfolioData();
+        });
+
+        async function loadPortfolioData() {
+            try {
+                const response = await fetch('/api/portfolio/data');
+                const data = await response.json();
+                
+                if (data.success) {
+                    portfolioData = data;
+                    updatePortfolioSummary(data.summary);
+                    updateHoldingsTable(data.stocks);
+                } else {
+                    showError('Failed to load portfolio data: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error loading portfolio:', error);
+                showError('Failed to load portfolio data');
+            }
+        }
+
+        function updatePortfolioSummary(summary) {
+            document.getElementById('totalValue').textContent = '$' + (summary.total_value || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            
+            const gainLoss = summary.total_gain_loss || 0;
+            const gainLossElement = document.getElementById('totalGainLoss');
+            gainLossElement.textContent = (gainLoss >= 0 ? '+$' : '-$') + Math.abs(gainLoss).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            gainLossElement.className = 'summary-value ' + (gainLoss >= 0 ? 'gain-positive' : 'gain-negative');
+            
+            const percentage = summary.total_percentage || 0;
+            const percentageElement = document.getElementById('totalPercentage');
+            percentageElement.textContent = (percentage >= 0 ? '+' : '') + percentage.toFixed(2) + '%';
+            percentageElement.className = 'summary-value ' + (percentage >= 0 ? 'gain-positive' : 'gain-negative');
+            
+            document.getElementById('totalStocks').textContent = summary.total_stocks || 0;
+        }
+
+        function updateHoldingsTable(stocks) {
+            const content = document.getElementById('holdingsContent');
+            
+            if (!stocks || stocks.length === 0) {
+                content.innerHTML = '<p>No stocks in portfolio. Click "Add Stock" to get started.</p>';
+                return;
+            }
+
+            let tableHTML = `
+                <table class="holdings-table">
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Shares</th>
+                            <th>Purchase Price</th>
+                            <th>Current Price</th>
+                            <th>Value</th>
+                            <th>Gain/Loss</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            stocks.forEach(stock => {
+                const gainLossClass = stock.gain_loss >= 0 ? 'gain-positive' : 'gain-negative';
+                tableHTML += `
+                    <tr>
+                        <td><strong>${stock.symbol}</strong></td>
+                        <td>${stock.quantity}</td>
+                        <td>$${stock.purchase_price.toFixed(2)}</td>
+                        <td>$${stock.current_price.toFixed(2)}</td>
+                        <td>$${stock.current_value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="${gainLossClass}">
+                            ${stock.gain_loss >= 0 ? '+' : ''}$${stock.gain_loss.toFixed(2)} 
+                            (${stock.percentage_change.toFixed(2)}%)
+                        </td>
+                        <td class="stock-actions">
+                            <button class="btn btn-info btn-sm" onclick="analyzeStock('${stock.symbol}')">
+                                <i class="fas fa-chart-line"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="removeStock('${stock.symbol}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += '</tbody></table>';
+            content.innerHTML = tableHTML;
+        }
+
+        // Modal functions
+        function openAddStockModal() {
+            document.getElementById('addStockModal').style.display = 'block';
+        }
+
+        function closeAddStockModal() {
+            document.getElementById('addStockModal').style.display = 'none';
+            document.getElementById('addStockForm').reset();
+        }
+
+        function closeStockAnalysisModal() {
+            document.getElementById('stockAnalysisModal').style.display = 'none';
+        }
+
+        // Add stock form submission
+        document.getElementById('addStockForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                symbol: document.getElementById('stockSymbol').value.toUpperCase(),
+                shares: parseFloat(document.getElementById('stockShares').value),
+                purchase_price: parseFloat(document.getElementById('purchasePrice').value),
+                purchase_date: document.getElementById('purchaseDate').value || null
+            };
+
+            try {
+                const response = await fetch('/api/portfolio/add_stock', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccess('Stock added successfully!');
+                    closeAddStockModal();
+                    loadPortfolioData(); // Refresh the portfolio
+                } else {
+                    showError('Failed to add stock: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error adding stock:', error);
+                showError('Failed to add stock');
+            }
+        });
+
+        async function removeStock(symbol) {
+            if (!confirm(`Are you sure you want to remove ${symbol} from your portfolio?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/portfolio/remove_stock', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ symbol: symbol })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showSuccess('Stock removed successfully!');
+                    loadPortfolioData(); // Refresh the portfolio
+                } else {
+                    showError('Failed to remove stock: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error removing stock:', error);
+                showError('Failed to remove stock');
+            }
+        }
+
+        async function analyzeStock(symbol) {
+            document.getElementById('analysisModalTitle').textContent = `${symbol} Analysis`;
+            document.getElementById('stockAnalysisModal').style.display = 'block';
+            document.getElementById('stockAnalysisContent').innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Generating AI analysis...</div>';
+
+            try {
+                const response = await fetch(`/api/portfolio/ai_analysis/${symbol}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayStockAnalysis(result.analysis, result.stock_data);
+                } else {
+                    document.getElementById('stockAnalysisContent').innerHTML = '<div class="error">Failed to generate analysis: ' + result.message + '</div>';
+                }
+            } catch (error) {
+                console.error('Error getting stock analysis:', error);
+                document.getElementById('stockAnalysisContent').innerHTML = '<div class="error">Failed to generate analysis</div>';
+            }
+        }
+
+        function displayStockAnalysis(analysis, stockData) {
+            const content = document.getElementById('stockAnalysisContent');
+            
+            let html = `
+                <div class="ai-insight-card">
+                    <div class="insight-grade grade-${analysis.position_grade ? analysis.position_grade.toLowerCase()[0] : 'c'}">
+                        Grade: ${analysis.position_grade || 'N/A'}
+                    </div>
+                    <h4>Recommendation: ${analysis.recommendation || 'HOLD'}</h4>
+                </div>
+            `;
+
+            if (analysis.key_points && analysis.key_points.length > 0) {
+                html += '<h4>Key Points:</h4><ul>';
+                analysis.key_points.forEach(point => {
+                    html += `<li>${point}</li>`;
+                });
+                html += '</ul>';
+            }
+
+            if (analysis.full_analysis) {
+                html += `<h4>Detailed Analysis:</h4><p>${analysis.full_analysis}</p>`;
+            }
+
+            content.innerHTML = html;
+        }
+
+        async function getAIAnalysis() {
+            document.getElementById('aiInsightsContent').innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Generating portfolio analysis...</div>';
+
+            try {
+                const response = await fetch('/api/portfolio/ai_analysis');
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayPortfolioAnalysis(result.analysis);
+                } else {
+                    document.getElementById('aiInsightsContent').innerHTML = '<div class="error">Failed to generate analysis: ' + result.message + '</div>';
+                }
+            } catch (error) {
+                console.error('Error getting AI analysis:', error);
+                document.getElementById('aiInsightsContent').innerHTML = '<div class="error">Failed to generate analysis</div>';
+            }
+        }
+
+        function displayPortfolioAnalysis(analysis) {
+            const content = document.getElementById('aiInsightsContent');
+            
+            let html = `
+                <div class="ai-insight-card">
+                    <div class="insight-grade grade-${analysis.performance_grade ? analysis.performance_grade.toLowerCase()[0] : 'c'}">
+                        Grade: ${analysis.performance_grade || 'N/A'}
+                    </div>
+                    <h4>${analysis.summary || 'Portfolio Analysis'}</h4>
+                </div>
+            `;
+
+            if (analysis.key_insights && analysis.key_insights.length > 0) {
+                html += '<div class="ai-insight-card"><h4>Key Insights:</h4><ul>';
+                analysis.key_insights.forEach(insight => {
+                    html += `<li>${insight}</li>`;
+                });
+                html += '</ul></div>';
+            }
+
+            if (analysis.recommendations && analysis.recommendations.length > 0) {
+                html += '<div class="ai-insight-card"><h4>Recommendations:</h4><ul>';
+                analysis.recommendations.forEach(rec => {
+                    html += `<li>${rec}</li>`;
+                });
+                html += '</ul></div>';
+            }
+
+            content.innerHTML = html;
+        }
+
+        function refreshPortfolio() {
+            loadPortfolioData();
+            showSuccess('Portfolio refreshed!');
+        }
+
+        function showError(message) {
+            // Simple error display - you could enhance this with a proper notification system
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            errorDiv.style.position = 'fixed';
+            errorDiv.style.top = '20px';
+            errorDiv.style.right = '20px';
+            errorDiv.style.zIndex = '3000';
+            document.body.appendChild(errorDiv);
+            
+            setTimeout(() => {
+                document.body.removeChild(errorDiv);
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.textContent = message;
+            successDiv.style.position = 'fixed';
+            successDiv.style.top = '20px';
+            successDiv.style.right = '20px';
+            successDiv.style.zIndex = '3000';
+            document.body.appendChild(successDiv);
+            
+            setTimeout(() => {
+                document.body.removeChild(successDiv);
+            }, 3000);
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const addModal = document.getElementById('addStockModal');
+            const analysisModal = document.getElementById('stockAnalysisModal');
+            
+            if (event.target === addModal) {
+                closeAddStockModal();
+            }
+            if (event.target === analysisModal) {
+                closeStockAnalysisModal();
+            }
+        }
+    </script>
+</body>
+</html>

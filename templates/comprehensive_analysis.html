@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if symbol %}{{ symbol }} - {% endif %}Comprehensive Fundamental Analysis - FinanceAI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        
+        .analysis-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+            padding: 30px;
+        }
+        
+        .header-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .analysis-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .metric-card {
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .ratio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .ratio-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        
+        .positive { color: #28a745; }
+        .negative { color: #dc3545; }
+        .neutral { color: #6c757d; }
+        
+        .recommendation-badge {
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        
+        .buy { background: #28a745; color: white; }
+        .hold { background: #ffc107; color: black; }
+        .sell { background: #dc3545; color: white; }
+        
+        .search-section {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .ai-analysis {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        
+        .risk-indicator {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 5px;
+        }
+        
+        .risk-low { background: #d4edda; color: #155724; }
+        .risk-medium { background: #fff3cd; color: #856404; }
+        .risk-high { background: #f8d7da; color: #721c24; }
+        
+        .news-item {
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .sentiment-positive { border-left-color: #28a745; }
+        .sentiment-negative { border-left-color: #dc3545; }
+        .sentiment-neutral { border-left-color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="analysis-container">
+            <!-- Header -->
+            <div class="header-card">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="mb-0">
+                            <i class="bi bi-graph-up"></i> 
+                            {% if symbol %}
+                                {{ symbol }} - Comprehensive Analysis
+                            {% else %}
+                                Fundamental Analysis Engine
+                            {% endif %}
+                        </h1>
+                        <p class="mb-0 mt-2">AI-Powered Quantitative & Qualitative Stock Research</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="d-flex justify-content-end gap-3">
+                            <a href="/" class="btn btn-light">
+                                <i class="bi bi-house"></i> Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stock Search Section -->
+            <div class="search-section">
+                <h4><i class="bi bi-search"></i> Analyze Any Stock</h4>
+                <div class="row">
+                    <div class="col-md-8">
+                        <input type="text" id="ticker-input" class="form-control form-control-lg" 
+                               placeholder="Enter stock ticker (e.g., AAPL, GOOGL, TSLA)..." 
+                               value="{{ symbol or '' }}">
+                    </div>
+                    <div class="col-md-4">
+                        <button onclick="analyzeStock()" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-graph-up-arrow"></i> Analyze Stock
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {% if error %}
+            <!-- Error Section -->
+            <div class="analysis-section">
+                <div class="alert alert-danger">
+                    <h5><i class="bi bi-exclamation-triangle"></i> Analysis Error</h5>
+                    <p>{{ error }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if analysis_data and not error %}
+            <!-- Company Overview -->
+            <div class="analysis-section">
+                <h3><i class="bi bi-building"></i> Company Overview</h3>
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4>{{ analysis_data.basic_info.company_name }}</h4>
+                        <p><strong>Sector:</strong> {{ analysis_data.basic_info.sector }}</p>
+                        <p><strong>Industry:</strong> {{ analysis_data.basic_info.industry }}</p>
+                        <p><strong>Market Cap:</strong> ${{ "{:,.2f}".format(analysis_data.basic_info.market_cap / 1000000) }}M</p>
+                        <p><strong>Employees:</strong> {{ "{:,}".format(analysis_data.basic_info.employees) }}</p>
+                        {% if analysis_data.basic_info.business_summary %}
+                        <p><strong>Business Summary:</strong></p>
+                        <p class="text-muted">{{ analysis_data.basic_info.business_summary[:500] }}...</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <div class="metric-card">
+                            <h3>${{ "{:.2f}".format(analysis_data.technical_analysis.current_price or 0) }}</h3>
+                            <p class="mb-0">Current Price</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Analysis -->
+            {% if analysis_data.ai_analysis %}
+            <div class="ai-analysis">
+                <h3><i class="bi bi-robot"></i> AI-Powered Analysis</h3>
+                <div class="row">
+                    <div class="col-md-9">
+                        <div style="white-space: pre-line;">{{ analysis_data.ai_analysis.summary }}</div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="recommendation-badge {% if 'BUY' in analysis_data.ai_analysis.summary %}buy{% elif 'SELL' in analysis_data.ai_analysis.summary %}sell{% else %}hold{% endif %}">
+                            {% if 'BUY' in analysis_data.ai_analysis.summary %}
+                                BUY
+                            {% elif 'SELL' in analysis_data.ai_analysis.summary %}
+                                SELL
+                            {% else %}
+                                HOLD
+                            {% endif %}
+                        </div>
+                        <p class="mb-0 mt-2">AI Recommendation</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Financial Ratios -->
+            <div class="analysis-section">
+                <h3><i class="bi bi-calculator"></i> Financial Ratios</h3>
+                <div class="ratio-grid">
+                    <div class="ratio-item">
+                        <h5 class="{% if analysis_data.financial_ratios.pe_ratio < 20 %}positive{% elif analysis_data.financial_ratios.pe_ratio > 30 %}negative{% else %}neutral{% endif %}">
+                            {{ "{:.2f}".format(analysis_data.financial_ratios.pe_ratio or 0) }}
+                        </h5>
+                        <p class="mb-0">P/E Ratio</p>
+                    </div>
+                    <div class="ratio-item">
+                        <h5 class="{% if analysis_data.financial_ratios.profit_margin > 15 %}positive{% elif analysis_data.financial_ratios.profit_margin < 5 %}negative{% else %}neutral{% endif %}">
+                            {{ "{:.2f}".format(analysis_data.financial_ratios.profit_margin or 0) }}%
+                        </h5>
+                        <p class="mb-0">Profit Margin</p>
+                    </div>
+                    <div class="ratio-item">
+                        <h5 class="{% if analysis_data.financial_ratios.return_on_equity > 15 %}positive{% elif analysis_data.financial_ratios.return_on_equity < 10 %}negative{% else %}neutral{% endif %}">
+                            {{ "{:.2f}".format(analysis_data.financial_ratios.return_on_equity or 0) }}%
+                        </h5>
+                        <p class="mb-0">Return on Equity</p>
+                    </div>
+                    <div class="ratio-item">
+                        <h5 class="{% if analysis_data.financial_ratios.current_ratio > 1.5 %}positive{% elif analysis_data.financial_ratios.current_ratio < 1 %}negative{% else %}neutral{% endif %}">
+                            {{ "{:.2f}".format(analysis_data.financial_ratios.current_ratio or 0) }}
+                        </h5>
+                        <p class="mb-0">Current Ratio</p>
+                    </div>
+                    <div class="ratio-item">
+                        <h5 class="{% if analysis_data.financial_ratios.debt_to_equity < 0.3 %}positive{% elif analysis_data.financial_ratios.debt_to_equity > 1 %}negative{% else %}neutral{% endif %}">
+                            {{ "{:.2f}".format(analysis_data.financial_ratios.debt_to_equity or 0) }}
+                        </h5>
+                        <p class="mb-0">Debt-to-Equity</p>
+                    </div>
+                    <div class="ratio-item">
+                        <h5 class="{% if analysis_data.financial_ratios.pb_ratio < 3 %}positive{% elif analysis_data.financial_ratios.pb_ratio > 5 %}negative{% else %}neutral{% endif %}">
+                            {{ "{:.2f}".format(analysis_data.financial_ratios.pb_ratio or 0) }}
+                        </h5>
+                        <p class="mb-0">Price-to-Book</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Valuation Analysis -->
+            <div class="analysis-section">
+                <h3><i class="bi bi-currency-dollar"></i> Valuation Analysis</h3>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="metric-card">
+                            <h4>${{ "{:.2f}".format(analysis_data.valuation.dcf_value_per_share or 0) }}</h4>
+                            <p class="mb-0">DCF Fair Value</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="metric-card">
+                            <h4>${{ "{:,.0f}".format(analysis_data.valuation.market_cap / 1000000 or 0) }}M</h4>
+                            <p class="mb-0">Market Cap</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="metric-card">
+                            <h4>{{ "{:.2f}".format(analysis_data.valuation.ev_ebitda or 0) }}</h4>
+                            <p class="mb-0">EV/EBITDA</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Growth Analysis -->
+            <div class="analysis-section">
+                <h3><i class="bi bi-graph-up"></i> Growth Analysis</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="ratio-item">
+                            <h5 class="{% if analysis_data.growth_analysis.revenue_growth > 10 %}positive{% elif analysis_data.growth_analysis.revenue_growth < 0 %}negative{% else %}neutral{% endif %}">
+                                {{ "{:.2f}".format(analysis_data.growth_analysis.revenue_growth or 0) }}%
+                            </h5>
+                            <p class="mb-0">Revenue Growth (YoY)</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="ratio-item">
+                            <h5 class="{% if analysis_data.growth_analysis.earnings_growth > 15 %}positive{% elif analysis_data.growth_analysis.earnings_growth < 0 %}negative{% else %}neutral{% endif %}">
+                                {{ "{:.2f}".format(analysis_data.growth_analysis.earnings_growth or 0) }}%
+                            </h5>
+                            <p class="mb-0">Earnings Growth (YoY)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical Analysis -->
+            {% if analysis_data.technical_analysis %}
+            <div class="analysis-section">
+                <h3><i class="bi bi-graph-down"></i> Technical Analysis</h3>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="ratio-item">
+                            <h5>${{ "{:.2f}".format(analysis_data.technical_analysis.ma20 or 0) }}</h5>
+                            <p class="mb-0">20-Day Moving Average</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="ratio-item">
+                            <h5>${{ "{:.2f}".format(analysis_data.technical_analysis.ma50 or 0) }}</h5>
+                            <p class="mb-0">50-Day Moving Average</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="ratio-item">
+                            <h5 class="{% if analysis_data.technical_analysis.rsi < 30 %}positive{% elif analysis_data.technical_analysis.rsi > 70 %}negative{% else %}neutral{% endif %}">
+                                {{ "{:.1f}".format(analysis_data.technical_analysis.rsi or 50) }}
+                            </h5>
+                            <p class="mb-0">RSI (14)</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="ratio-item">
+                            <h5 class="{% if analysis_data.technical_analysis.trend == 'Bullish' %}positive{% else %}negative{% endif %}">
+                                {{ analysis_data.technical_analysis.trend or 'Neutral' }}
+                            </h5>
+                            <p class="mb-0">Trend</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Risk Assessment -->
+            <div class="analysis-section">
+                <h3><i class="bi bi-shield-exclamation"></i> Risk Assessment</h3>
+                <div class="row">
+                    <div class="col-md-4">
+                        <p><strong>Financial Risk:</strong> 
+                            <span class="risk-indicator risk-{{ analysis_data.risk_assessment.financial_risk.lower() }}">
+                                {{ analysis_data.risk_assessment.financial_risk }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Market Risk:</strong> 
+                            <span class="risk-indicator risk-{{ analysis_data.risk_assessment.market_risk.lower() }}">
+                                {{ analysis_data.risk_assessment.market_risk }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Liquidity Risk:</strong> 
+                            <span class="risk-indicator risk-{{ analysis_data.risk_assessment.liquidity_risk.lower() }}">
+                                {{ analysis_data.risk_assessment.liquidity_risk }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                {% if analysis_data.risk_assessment.risk_factors %}
+                <div class="mt-3">
+                    <h5>Key Risk Factors:</h5>
+                    <ul>
+                        {% for factor in analysis_data.risk_assessment.risk_factors %}
+                        <li>{{ factor }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Enhanced News Sentiment (Pathway) -->
+            {% if analysis_data.news_sentiment and analysis_data.news_sentiment.recent_news %}
+            <div class="analysis-section">
+                <h3><i class="bi bi-newspaper"></i> Enhanced News Analysis (Pathway)</h3>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="ratio-item">
+                            <h5 class="{% if analysis_data.news_sentiment.overall_sentiment > 0.1 %}positive{% elif analysis_data.news_sentiment.overall_sentiment < -0.1 %}negative{% else %}neutral{% endif %}">
+                                {{ "{:.3f}".format(analysis_data.news_sentiment.overall_sentiment) }}
+                            </h5>
+                            <p class="mb-0">Overall Sentiment Score</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="ratio-item">
+                            <h5>{{ analysis_data.news_sentiment.news_count }}</h5>
+                            <p class="mb-0">Articles Analyzed</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="ratio-item">
+                            <h5>{{ analysis_data.news_sentiment.recent_news|length if analysis_data.news_sentiment.recent_news else 0 }}</h5>
+                            <p class="mb-0">Recent Articles</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <button onclick="refreshNews('{{ symbol }}')" class="btn btn-outline-primary btn-sm me-2">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh News Stream
+                    </button>
+                    <button onclick="addToWatchlist('{{ symbol }}')" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-bell"></i> Add to Alert Watchlist
+                    </button>
+                </div>
+                
+                <h5>Recent News Articles:</h5>
+                {% for news in analysis_data.news_sentiment.recent_news[:8] %}
+                <div class="news-item sentiment-{% if (news.sentiment_score or news.sentiment or 0) > 0.05 %}positive{% elif (news.sentiment_score or news.sentiment or 0) < -0.05 %}negative{% else %}neutral{% endif %}">
+                    <h6><a href="{{ news.link or news.url }}" target="_blank">{{ news.title }}</a></h6>
+                    <div class="news-meta">
+                        <small class="text-muted">
+                            <strong>{{ news.source or 'Unknown' }}</strong> | 
+                            {{ news.published or news.date or 'Unknown date' }} | 
+                            Sentiment: {{ "{:.2f}".format(news.sentiment_score or news.sentiment or 0) }}
+                            {% if news.relevance %}
+                            | Relevance: {{ "{:.2f}".format(news.relevance) }}
+                            {% endif %}
+                        </small>
+                        {% if news.keywords %}
+                        <div class="news-keywords mt-1">
+                            <small class="text-info">Keywords: {{ news.keywords }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Peer Comparison -->
+            <div class="analysis-section">
+                <h3><i class="bi bi-bar-chart"></i> Peer Comparison</h3>
+                <p><strong>Sector:</strong> {{ analysis_data.peer_comparison.sector }}</p>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="ratio-item">
+                            <h5>{{ "{:.1f}".format(analysis_data.peer_comparison.sector_pe_avg or 0) }}</h5>
+                            <p class="mb-0">Sector Avg P/E</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="ratio-item">
+                            <h5>{{ "{:.1f}".format(analysis_data.peer_comparison.sector_pb_avg or 0) }}</h5>
+                            <p class="mb-0">Sector Avg P/B</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="ratio-item">
+                            <h5>{{ "{:.1f}".format(analysis_data.peer_comparison.sector_roe_avg or 0) }}%</h5>
+                            <p class="mb-0">Sector Avg ROE</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="mt-3"><strong>Relative Valuation:</strong> {{ analysis_data.peer_comparison.relative_valuation }}</p>
+            </div>
+            {% endif %}
+
+            {% if not symbol %}
+            <!-- Default Welcome Section -->
+            <div class="analysis-section text-center">
+                <h3><i class="bi bi-search"></i> Enter a Stock Ticker to Begin Analysis</h3>
+                <p class="lead">Get comprehensive fundamental analysis including:</p>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="metric-card">
+                            <i class="bi bi-calculator" style="font-size: 2em;"></i>
+                            <h5>Financial Ratios</h5>
+                            <p>P/E, ROE, Debt ratios</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="metric-card">
+                            <i class="bi bi-graph-up" style="font-size: 2em;"></i>
+                            <h5>Growth Analysis</h5>
+                            <p>Revenue & earnings trends</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="metric-card">
+                            <i class="bi bi-robot" style="font-size: 2em;"></i>
+                            <h5>AI Insights</h5>
+                            <p>Powered by Gemini AI</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="metric-card">
+                            <i class="bi bi-newspaper" style="font-size: 2em;"></i>
+                            <h5>News Sentiment</h5>
+                            <p>Real-time market sentiment</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Update Timestamp -->
+            <div class="text-center mt-4">
+                <small class="text-muted">
+                    {% if analysis_data %}
+                        Last updated: {{ analysis_data.last_updated[:19] }}
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function analyzeStock() {
+            const ticker = document.getElementById('ticker-input').value.trim().toUpperCase();
+            if (ticker) {
+                window.location.href = `/fundamental_analysis/${ticker}`;
+            } else {
+                alert('Please enter a valid stock ticker symbol');
+            }
+        }
+
+        // Allow Enter key to trigger analysis
+        document.getElementById('ticker-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                analyzeStock();
+            }
+        });
+
+        // Auto-focus on ticker input
+        document.addEventListener('DOMContentLoaded', function() {
+            const tickerInput = document.getElementById('ticker-input');
+            if (tickerInput && !tickerInput.value) {
+                tickerInput.focus();
+            }
+        });
+        
+        function refreshNews(symbol) {
+            fetch(`/api/refresh_news/${symbol}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(`✅ ${data.message} - Fetched ${data.articles_fetched} articles`);
+                        // Refresh the page to show updated news
+                        window.location.reload();
+                    } else {
+                        alert(`❌ Error: ${data.message}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error refreshing news:', error);
+                    alert('❌ Error refreshing news stream');
+                });
+        }
+        
+        function addToWatchlist(symbol) {
+            fetch(`/api/add_watchlist/${symbol}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(`✅ ${data.message}`);
+                    } else {
+                        alert(`❌ Error: ${data.message}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding to watchlist:', error);
+                    alert('❌ Error adding to watchlist');
+                });
+        }
+        
+        function viewNewsAlerts(symbol) {
+            fetch(`/api/news_alerts/${symbol}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const alerts = data.data.alerts;
+                        if (alerts.length === 0) {
+                            alert('ℹ️ No active alerts for this symbol');
+                        } else {
+                            let alertText = `🚨 Active Alerts for ${symbol}:\n\n`;
+                            alerts.forEach(alert => {
+                                alertText += `• ${alert.type} (${alert.severity}): ${alert.title}\n`;
+                            });
+                            alert(alertText);
+                        }
+                    } else {
+                        alert(`❌ Error: ${data.message}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching alerts:', error);
+                    alert('❌ Error fetching alerts');
+                });
+        }
+    </script>
+</body>
+</html>
