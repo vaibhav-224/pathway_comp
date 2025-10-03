@@ -66,7 +66,7 @@ The system leverages Pathway for real-time data processing:
 
 1. **Clone the repository**
 ```bash
-git clone <repository-url>
+git clone https://github.com/vaibhav-224/pathway_comp
 cd pathbhay
 ```
 
